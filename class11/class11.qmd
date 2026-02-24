@@ -1,0 +1,216 @@
+---
+title: "Class 11 Alphafold"
+author: "Jacob Hizon A17776679"
+format: pdf
+---
+
+## 5. The EBI AlphaFold database
+
+Use the following sequences to search AFDB 
+
+>HIV-Pr
+PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+
+## 6. Generating your own structure predictions
+
+First, check the AFDB for the protein of interest. If your structure has already been predicted there, you can download the AFDB PDB file and skip to the Interpreting Results section below.
+
+
+Otherwise obtain the sequence of your protein of interest, e.g. at UniProt. Click on the FASTA button above the sequence in UniProt. Copy only the sequence, excluding the FASTA header line that begins with “>”.
+
+
+For your first time through this lab I would like you to use the HIV-Pr sequence to generate a single chain model. After your first run you can experiment with generating the biologically relevant homodimer (the monomer is unstable in reality and the dimer is the functional unit):
+>HIV-Pr
+PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+
+
+And for your 2nd run the dimer input. As it is a homodimer this consists of the same sequence twice with a colon between chains:
+
+>HIV-Pr-Dimer
+PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYD
+QILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF:PQITLWQRPLVTIKIGGQLK
+EALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPT
+PVNIIGRNLLTQIGCTLNF
+You can also experiment with your “find-a-gene” project sequence as you will need this result for your project work).
+
+
+
+Visit AlphaFold2_mmseqs2 Colab notebook (at the time of writing this is currently the preferred AlphaFold version for our current prediction tasks.
+
+Click on “Connect” on top right toolbar to obtain access to computing resources to run AlphaFold on. If successful this will connect you to Google Compute Engine cloud resources with a GPU. A green tick should appear along with RAM and Disk space graphics
+
+In the first main page code cell paste in your query_sequence, making sure to completely replace the default sequence
+
+Enter a descriptive jobname (replacing the default “test” value). Note that the results.zip filename obtained at the end of the full computation will begin with this jobname (but none of its contents include the jobname).
+
+
+For now leave all other parameters (i.e. the code cells) at their default values. We can explore them later after completing our first successful run.
+
+
+Back at the very top of the page where we have the “File”/“Edit”/“View” toolbar menu items click “Runtime” > “Run All"
+
+
+
+## 8. Custom analysis of resulting models
+
+# Change this for YOUR results dir name
+
+```{r}
+# Change this for YOUR results dir name
+results_dir <- "hivprdimer_23119" 
+```
+ 
+```{r}
+# File names for all PDB models
+pdb_files <- list.files(path=results_dir,
+                        pattern="*.pdb",
+                        full.names = TRUE)
+
+# Print our PDB file names
+basename(pdb_files)
+```
+
+
+
+```{r}
+library(bio3d)
+
+# Read all data from Models 
+#  and superpose/fit coords
+pdbs <- pdbaln(pdb_files, fit=TRUE, exefile="msa")
+```
+
+```{r}
+pdbs
+```
+
+```{r}
+rd <- rmsd(pdbs, fit=T)
+range(rd)
+```
+```{r}
+library(pheatmap)
+
+colnames(rd) <- paste0("m",1:5)
+rownames(rd) <- paste0("m",1:5)
+pheatmap(rd)
+```
+
+
+```{r}
+plotb3(pdbs$b[1,], typ="l", lwd=2, sse=pdbs)
+points(pdbs$b[2,], typ="l", col="red")
+points(pdbs$b[3,], typ="l", col="blue")
+points(pdbs$b[4,], typ="l", col="darkgreen")
+points(pdbs$b[5,], typ="l", col="orange")
+abline(v=100, col="gray")
+```
+```{r}
+core <- core.find(pdbs)
+core.inds <- print(core, vol=0.5)
+```
+```{r}
+xyz <- pdbfit(pdbs, core.inds, outpath="corefit_structures")
+```
+
+```{r}
+rf <- rmsf(xyz)
+
+plotb3(rf, sse=pdbs)
+abline(v=100, col="gray", ylab="RMSF")
+```
+
+
+```{r}
+library(jsonlite)
+
+# Listing of all PAE JSON files
+pae_files <- list.files(path=results_dir,
+                        pattern=".*model.*\\.json",
+                        full.names = TRUE)
+```
+
+```{r}
+pae1 <- read_json(pae_files[1],simplifyVector = TRUE)
+pae5 <- read_json(pae_files[5],simplifyVector = TRUE)
+
+attributes(pae1)
+```
+
+```{r}
+# Per-residue pLDDT scores 
+#  same as B-factor of PDB..
+head(pae1$plddt) 
+```
+
+```{r}
+pae1$max_pae
+```
+
+```{r}
+pae5$max_pae
+```
+
+```{r}
+plot.dmat(pae1$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)")
+```
+
+```{r}
+plot.dmat(pae5$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+```
+
+```{r}
+plot.dmat(pae1$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+```
+
+> Residue conservation from alignment file
+
+```{r}
+aln_file <- list.files(path=results_dir,
+                       pattern=".a3m$",
+                        full.names = TRUE)
+aln_file
+```
+
+```{r}
+aln <- read.fasta(aln_file[1], to.upper = TRUE)
+```
+
+```{r}
+dim(aln$ali)
+```
+
+```{r}
+library(bio3d)
+
+# read one structure (e.g., the first PDB file)
+#pdb <- read.pdb(pdb_files[1])
+
+# trim that pdb to chain A (for SSE display)
+#sseA <- trim.pdb(pdb, chain = "A")
+
+# now plot
+#plotb3(sim[1:99], sse = sseA, ylab = "Conservation Score")
+```
+
+```{r}
+con <- consensus(aln, cutoff = 0.9)
+con$seq
+```
+
+```{r}
+#m1.pdb <- read.pdb(pdb_files[1])
+#occ <- vec2resno(c(sim[1:99], sim[1:99]), m1.pdb$atom$resno)
+#write.pdb(m1.pdb, o=occ, file="m1_conserv.pdb")
+```
+
