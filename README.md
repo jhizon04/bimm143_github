@@ -5,34 +5,34 @@ My class work for [BIMM 143](https://bioboot.github.io/bimm143_W26/schedule/) at
 
 *Introductory material*
 
-- Class 04 [Intro to R](class04/class04.qmd)
+- Class 04 [Intro to R](class04/class04.pdf)
   
 - Class 05 [Data viz with ggplot](class05/class05.md)
   
 - Class 06 [R functions](class06/class06.md)
 
-- Class 07 []()
+- Class 07 [Machine Learning 1](class07/class07.md)
 
-- Class 08 []()
+- Class 08 [Unsupervised Learning Mini-Project](class_08_mini_project/class08.md)
 
-- Class 09 []()
+- Class 09 [Candy Mini-Project](class09/class09.md)
 
-- Class 10 []()
+- Class 10 [Structural Bioinformatics (pt1)](class10/class10.md)
 
-- Class 11 []()
+- Class 11 [Structural Bioinformatics (pt2. Focus on new AlphaFold2)](class11/class11.md)
 
-- Class 12 []()
+- Class 12 [Genome informatics](class12/class12.md)
 
-- Class 13 []()
+- Class 13 [Transcriptomics and the analysis of RNA-Seq data](class13/class13.md)
 
-- Class 14 []()
+- Class 14 [RNA-Seq analysis mini-project](class14/class14.md)
 
-- Class 15 []()
+- Class 15 [Hands-on with Git and GitHub]()
 
-- Class 16 []()
+- Class 16 [Essential UNIX for bioinformatics](class16/unix_notes.md)
 
-- Class 17 []()
+- Class 17 [Analyzing sequencing data in the cloud](class17/class17.md)
 
-- Class 18 []()
+- Class 18 [Mini Project: Investigating Pertussis Resurgence](class18/class18.md)
 
-- Class 19 []()
+- Class 19 [Mini Project: Cancer Mutation Analysis](class19/class19.md)
